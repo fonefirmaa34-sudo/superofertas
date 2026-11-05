@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Ofertas SP</title>
+<meta name="description" content="Ofertas de 10 supermercados de São Paulo, lidas e comparadas todo dia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6f7; --panel: #ffffff; --fg: #1d2a30; --muted: #5d6b72; --line: #dde3e6; --track: #e8edef; --bar: #b9c4c9;
+    --blue: #17607f; --on-blue: #ffffff; --yellow: #ffe14d; --on-yellow: #1d2a30; --green: #1f8a4c; --on-green: #ffffff;
+    --ok: #17803f; --bad: #c0392b; --gold: #f2b705;
+    --sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --r: 6px; color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11181c; --panel: #1a2328; --fg: #e8eef1; --muted: #9aa8af; --line: #2d3a41; --track: #26323a; --bar: #4a5a63;
+            --ok: #4cc27a; --bad: #ef7a6c; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.45; }
+  .wrap { max-width: 1200px; margin-inline: auto; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+          display: grid; gap: 20px; }
+  .hero { background: var(--blue); color: var(--on-blue); border-radius: 18px; padding: 28px; display: grid; gap: 16px; }
+  .hero-top { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; justify-content: space-between; }
+  h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(2.1rem, 7vw, 3.6rem); letter-spacing: .04em; line-height: 1; }
+  .sub { margin: 6px 0 0; opacity: .85; }
+  .day { display: grid; gap: 4px; font-size: 13px; }
+  .day select { font: inherit; font-size: 15px; padding: 7px 10px; border-radius: var(--r); border: 1px solid rgba(255,255,255,.5);
+                background: rgba(255,255,255,.12); color: inherit; }
+  .day select option { color: #1d2a30; background: #fff; }
+  .take { margin: 0; font-size: 1.2rem; line-height: 1.4; text-wrap: balance; }
+  .take b { font-weight: 700; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: 14px; margin: 0;
+          padding-top: 14px; border-top: 1px solid rgba(255,255,255,.25); }
+  .kpis div { display: grid; gap: 2px; }
+  .kpis dt { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .07em; }
+  .kpis dd { margin: 0; font-family: var(--serif); font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .card > header { background: var(--yellow); color: var(--on-yellow); padding: 12px 20px; }
+  .card.green > header { background: var(--green); color: var(--on-green); }
+  .card h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+  .card.green h2 { letter-spacing: .06em; }
+  .card header p { margin: 2px 0 0; font-size: 12.5px; opacity: .85; }
+  .body { padding: 20px; display: grid; gap: 10px; min-width: 0; position: relative; }
+  .trophy { justify-items: center; text-align: center; }
+  .cup { width: 64px; height: 64px; }
+  .winner { font-family: var(--serif); font-size: 1.9rem; line-height: 1.15; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .bars { display: grid; gap: 10px; width: 100%; text-align: left; }
+  .bar { display: grid; gap: 3px; font-size: 12.5px; }
+  .bar-top { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+  .bar-name { font-weight: 600; font-size: 14px; }
+  .track { height: 10px; background: var(--track); border-radius: var(--r); overflow: hidden; }
+  .fill { height: 100%; background: var(--bar); border-radius: var(--r); }
+  .bar.best .fill { background: var(--blue); }
+  .bar.gold .fill { background: var(--gold); }
+  .difs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .difs .fill { background: var(--yellow); }
+  .pct { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ok); }
+  .ofs { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); }
+  .of { border: 2px solid var(--green); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start;
+        background: color-mix(in srgb, var(--green) 8%, var(--panel)); }
+  .of-prod { font-weight: 600; line-height: 1.25; }
+  .of-preco { font-family: var(--serif); font-size: 1.7rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .of-preco small { font-family: var(--sans); font-size: 12.5px; color: var(--muted); }
+  .of-pct { justify-self: start; background: var(--green); color: var(--on-green); font-weight: 700; border-radius: 999px; padding: 2px 10px; font-size: 12.5px; }
+  .of-merc { font-size: 12.5px; color: var(--muted); }
+  .of-merc b { color: var(--fg); }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tools input, .tools select { font: inherit; padding: 7px 10px; border-radius: var(--r); border: 1px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0; }
+  .tools input { flex: 1 1 12rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); }
+  .legend span::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .legend .l-min::before { background: color-mix(in srgb, var(--ok) 40%, transparent); }
+  .legend .l-max::before { background: color-mix(in srgb, var(--bad) 30%, transparent); }
+  .tablewrap { overflow: auto; max-height: 34rem; border: 1px solid var(--line); border-radius: var(--r); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th { position: sticky; top: 0; background: var(--panel); text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; font-weight: 700; }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); z-index: 1; }
+  th:first-child { z-index: 2; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  td:first-child { white-space: normal; min-width: 10rem; }
+  td.min { background: color-mix(in srgb, var(--ok) 18%, var(--panel)); color: var(--ok); font-weight: 700; }
+  td.max { background: color-mix(in srgb, var(--bad) 14%, var(--panel)); color: var(--bad); }
+  td.none, .unit { color: var(--muted); }
+  td[data-m] { cursor: help; }
+  .tip { position: absolute; z-index: 5; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+         box-shadow: 0 6px 20px rgba(0,0,0,.18); padding: 6px 10px; font-size: 12.5px; max-width: 18rem; display: grid; gap: 2px; }
+  .tip[hidden] { display: none; }
+  .tip .k { color: var(--muted); }
+  .foot { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .msg { padding: 40px 0; text-align: center; color: var(--muted); }
+  select:focus-visible, input:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <h1>SUPER OFERTAS</h1>
+        <p class="sub">Ofertas de 10 supermercados de São Paulo, lidas e comparadas todo dia.</p>
+      </div>
+      <label class="day">Dia <select id="dia" aria-label="Escolher o dia"></select></label>
+    </div>
+    <p class="take"><b id="t-venc">—</b> foi o barateiro do dia: mais barato em <b id="t-n">—</b> dos <b id="t-comp">—</b> produtos encontrados em 3 ou mais mercados.</p>
+    <dl class="kpis">
+      <div><dt>Data</dt><dd id="k-data">—</dd></div>
+      <div><dt>Mercados lidos</dt><dd><span id="k-lidos">—</span> de <span id="k-total">—</span></dd></div>
+      <div><dt>Ofertas lidas</dt><dd id="k-ofertas">—</dd></div>
+      <div><dt>Produtos comparados</dt><dd id="k-comp">—</dd></div>
+    </dl>
+  </section>
+
+  <div class="grid">
+    <article class="card">
+      <header><h2>Troféu Barateiro do dia</h2><p>Mercado mais barato no maior número de produtos em comum</p></header>
+      <div class="body trophy">
+        <svg class="cup" viewBox="0 0 64 64" aria-hidden="true"><path d="M18 8h28v14a14 14 0 0 1-28 0z" fill="#f2b705"/><path d="M18 12H8v4a10 10 0 0 0 10 10M46 12h10v4a10 10 0 0 1-10 10" fill="none" stroke="#f2b705" stroke-width="4"/><path d="M28 36h8v10h-8z" fill="#d99a00"/><path d="M20 48h24v8H20z" fill="#17607f"/></svg>
+        <div class="winner" id="tr-venc">—</div>
+        <p class="note">Mais barato em <b id="tr-n">—</b> produtos, <b id="tr-solo">—</b> deles sozinho.</p>
+        <div class="bars" id="tr-rank"></div>
+      </div>
+    </article>
+    <article class="card">
+      <header><h2>Ranking da cesta</h2><p>Quanto a soma dos itens de cada mercado fica acima da soma dos menores preços dos mesmos itens</p></header>
+      <div class="body"><div class="bars" id="cesta"></div></div>
+    </article>
+    <article class="card">
+      <header><h2>Maiores diferenças de preço</h2><p>Quanto o mais barato economiza sobre o mais caro, em %</p></header>
+      <div class="body"><ol class="difs" id="difs"></ol></div>
+    </article>
+    <article class="card">
+      <header><h2>Troféus da semana</h2><p>Quantos dias cada mercado foi o Barateiro, nos últimos 7 dias com dados</p></header>
+      <div class="body"><div class="bars" id="semana"></div><p class="note" id="semana-nota"></p></div>
+    </article>
+  </div>
+
+  <article class="card green">
+    <header><h2>OFERTA DAS OFERTAS</h2><p>Os 5 produtos em comum com a maior diferença de preço entre mercados, e onde estão mais baratos</p></header>
+    <div class="body"><ol class="ofs" id="ofertas"></ol></div>
+  </article>
+
+  <article class="card">
+    <header><h2>Produtos em comum com preços</h2><p>Preço por unidade em cada mercado; passe o mouse (ou toque) num preço para ver o produto e a condição da oferta</p></header>
+    <div class="body" id="tabela-card">
+      <div class="tools">
+        <input id="q" type="search" placeholder="Buscar produto" aria-label="Buscar produto">
+        <select id="secao" aria-label="Seção"></select>
+      </div>
+      <div class="legend"><span class="l-min">Menor preço</span><span class="l-max">Maior preço</span></div>
+      <div class="tablewrap"><table id="tabela"></table></div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+  </article>
+
+  <p class="foot">Não lidos neste dia: <span id="naolidos">—</span>. Regras: só ofertas válidas no dia; quando há dois preços vale o menor (app, cartão, a partir de X unidades); industrializados só comparam mesma marca e tamanho; hortifrúti, açougue e ovos comparam pelo tipo. Atualizado em <span id="gerado">—</span>.</p>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+  const brl = (v) => 'R$ ' + v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const pct = (v) => v.toFixed(1).replace('.', ',') + '%';
+  const int = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const dataBR = (s) => s.slice(8, 10) + '/' + s.slice(5, 7) + '/' + s.slice(0, 4);
+  let D = null, dia = null;
+
+  function barra(nome, direita, frac, cls, nota) {
+    const d = el('div', 'bar' + (cls ? ' ' + cls : ''));
+    const top = el('div', 'bar-top'); top.append(el('span', 'bar-name', nome), el('span', '', direita));
+    const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = Math.max(2, frac * 100) + '%'; t.append(f);
+    d.append(top, t); if (nota) d.append(el('span', 'note', nota)); return d;
+  }
+
+  function render() {
+    const hoje = D.dias.find((r) => r.data === dia);
+    const set = (id, v) => { $(id).textContent = v === null || v === undefined || v === '' ? '—' : v; };
+    set('t-venc', hoje.vencedor); set('t-n', hoje.venceuEm); set('t-comp', hoje.produtosComparados);
+    set('k-data', dataBR(hoje.data)); set('k-lidos', hoje.mercadosLidos); set('k-total', hoje.mercadosTotal);
+    set('k-ofertas', int(hoje.totalOfertas)); set('k-comp', hoje.produtosComparados);
+    set('tr-venc', hoje.vencedor); set('tr-n', hoje.venceuEm); set('tr-solo', hoje.venceuSozinho);
+    set('naolidos', hoje.naoLidos || 'nenhum');
+
+    const rk = D.ranking.filter((r) => r.data === dia).sort((a, b) => b.vitorias - a.vitorias || b.sozinho - a.sozinho);
+    const mx = Math.max(1, ...rk.map((r) => r.vitorias));
+    $('tr-rank').replaceChildren(...rk.map((r, i) => barra(r.mercado, r.vitorias + (r.vitorias === 1 ? ' produto' : ' produtos'), r.vitorias / mx, i === 0 ? 'best' : '')));
+
+    const cs = D.cesta.filter((r) => r.data === dia).sort((a, b) => a.acimaPct - b.acimaPct || b.itens - a.itens);
+    const mc = Math.max(1, ...cs.map((r) => r.acimaPct));
+    $('cesta').replaceChildren(...cs.map((r, i) => barra(r.mercado, '+' + pct(r.acimaPct), r.acimaPct / mc, i === 0 ? 'best' : '',
+      r.itens + (r.itens === 1 ? ' item' : ' itens') + ' · ' + brl(r.total) + ' (mínimo ' + brl(r.minimo) + ')')));
+
+    const prods = D.produtos.filter((r) => r.data === dia && r.pct > 0).sort((a, b) => b.pct - a.pct);
+    $('difs').replaceChildren(...prods.slice(0, 10).map((r) => {
+      const li = el('li', 'bar');
+      const top = el('div', 'bar-top'); top.append(el('span', 'bar-name', r.produto), el('span', 'pct', pct(r.pct)));
+      const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = Math.max(2, r.pct) + '%'; t.append(f);
+      li.append(top, t, el('span', 'note', brl(r.menor) + '/' + r.unidade + ' em ' + r.maisBarato + ' · ' + brl(r.maior) + ' em ' + r.maisCaro));
+      return li;
+    }));
+
+    $('ofertas').replaceChildren(...prods.slice(0, 5).map((r) => {
+      const li = el('li', 'of');
+      const v = el('div', 'of-preco', brl(r.menor) + ' '); v.append(el('small', '', '/ ' + r.unidade));
+      const m = el('div', 'of-merc'); m.append(el('b', '', r.maisBarato), document.createTextNode(' · mais caro: ' + r.maisCaro + ' ' + brl(r.maior)));
+      li.append(el('div', 'of-prod', r.produto), v, el('span', 'of-pct', pct(r.pct) + ' mais barato'), m);
+      return li;
+    }));
+
+    const ult = D.dias.slice(-7), cont = new Map();
+    for (const r of ult) if (r.vencedor) cont.set(r.vencedor, (cont.get(r.vencedor) || 0) + 1);
+    const sem = [...cont.entries()].sort((a, b) => b[1] - a[1]);
+    $('semana').replaceChildren(...sem.map(([m, n], i) => barra(m, n + (n === 1 ? ' dia' : ' dias'), n / ult.length, i === 0 ? 'gold' : '')));
+    $('semana-nota').textContent = ult.length + (ult.length === 1 ? ' dia com dados' : ' dias com dados') + ': ' + dataBR(ult[0].data) + ' a ' + dataBR(ult[ult.length - 1].data);
+
+    const secs = [...new Set(D.produtos.filter((r) => r.data === dia).map((r) => r.secao).filter(Boolean))].sort();
+    const sv = $('secao').value;
+    $('secao').replaceChildren(new Option('Todas as seções', ''), ...secs.map((s) => new Option(s)));
+    $('secao').value = secs.includes(sv) ? sv : '';
+    tabela();
+  }
+
+  function tabela() {
+    const pr = D.precos.filter((p) => p.data === dia), info = new Map();
+    for (const q of D.produtos) if (q.data === dia) info.set(q.produto, q);
+    const by = new Map(), det = new Map(), cnt = new Map();
+    for (const p of pr) {
+      if (!by.has(p.produto)) by.set(p.produto, { produto: p.produto, unidade: p.unidade, v: {} });
+      by.get(p.produto).v[p.mercado] = p.porUnidade; det.set(p.produto + '|' + p.mercado, p);
+      cnt.set(p.mercado, (cnt.get(p.mercado) || 0) + 1);
+    }
+    const mercados = [...cnt.keys()].sort((a, b) => cnt.get(b) - cnt.get(a) || a.localeCompare(b));
+    const sec = $('secao').value, q = $('q').value.trim().toLowerCase();
+    const rows = [...by.values()].filter((r) => (!sec || (info.get(r.produto) || {}).secao === sec) && (!q || r.produto.toLowerCase().includes(q)))
+      .sort((a, b) => ((info.get(b.produto) || {}).pct || 0) - ((info.get(a.produto) || {}).pct || 0));
+    const thead = el('thead'), hr = el('tr');
+    hr.append(el('th', '', 'Produto'), el('th', '', 'Unidade'), ...mercados.map((m) => el('th', '', m)), el('th', '', 'Diferença'));
+    thead.append(hr);
+    const tbody = el('tbody');
+    for (const r of rows) {
+      const tr = el('tr'), vals = Object.values(r.v), mn = Math.min(...vals), mx = Math.max(...vals);
+      tr.append(el('td', '', r.produto), el('td', 'unit', r.unidade));
+      for (const m of mercados) {
+        const v = r.v[m];
+        if (typeof v === 'number') {
+          const td = el('td', mx > mn && v - mn < 0.005 ? 'min' : mx > mn && mx - v < 0.005 ? 'max' : '', brl(v));
+          td.dataset.m = m; td.dataset.p = r.produto; td.tabIndex = 0; tr.append(td);
+        } else tr.append(el('td', 'none', '·'));
+      }
+      const p = (info.get(r.produto) || {}).pct || 0;
+      tr.append(el('td', 'pct', p > 0 ? pct(p) : '—'));
+      tbody.append(tr);
+    }
+    if (!rows.length) { const tr = el('tr'), td = el('td', 'none', 'Nenhum produto encontrado.'); td.colSpan = mercados.length + 3; tr.append(td); tbody.append(tr); }
+    $('tabela').replaceChildren(thead, tbody);
+    $('tabela')._det = det;
+  }
+
+  function dica(ev) {
+    const td = ev.target.closest && ev.target.closest('td[data-m]'), tip = $('tip'), card = $('tabela-card');
+    if (!td) { tip.hidden = true; return; }
+    const p = $('tabela')._det.get(td.dataset.p + '|' + td.dataset.m);
+    if (!p) { tip.hidden = true; return; }
+    const line = (k, v) => { const s = el('div'); s.append(el('span', 'k', k + ': '), document.createTextNode(v)); return s; };
+    const head = el('div', '', p.mercado); head.style.fontWeight = '700';
+    tip.replaceChildren(head, line('Produto', p.item), line('Preço', brl(p.preco)), line('Condição', p.condicao));
+    tip.hidden = false;
+    const cb = card.getBoundingClientRect(), tb = td.getBoundingClientRect();
+    tip.style.left = Math.min(Math.max(0, tb.left - cb.left), Math.max(0, cb.width - 290)) + 'px';
+    tip.style.top = (tb.bottom - cb.top + 6) + 'px';
+  }
+
+  $('tabela').addEventListener('mouseover', dica);
+  $('tabela').addEventListener('focusin', dica);
+  $('tabela').addEventListener('click', dica);
+  $('tabela').addEventListener('mouseleave', () => { $('tip').hidden = true; });
+  $('q').addEventListener('input', tabela);
+  $('secao').addEventListener('change', tabela);
+  const cache = new Map();
+  function loadDay(d) {
+    if (cache.has(d)) return Promise.resolve(cache.get(d));
+    return fetch('d/' + d + '.json?v=' + encodeURIComponent(G)).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then((j) => { cache.set(d, j); return j; });
+  }
+  function show(d) {
+    return loadDay(d).then((j) => { dia = d; D.produtos = j.produtos; D.precos = j.precos; D.ranking = j.ranking; D.cesta = j.cesta; render(); });
+  }
+  function erro() {
+    if (document.querySelector('.msg')) return;
+    document.querySelector('.grid').before(Object.assign(el('p', 'msg'), { textContent: 'Não foi possível carregar os dados agora. Tente recarregar a página em alguns minutos.' }));
+  }
+  let G = '';
+  $('dia').addEventListener('change', () => { show($('dia').value).catch(erro); });
+
+  fetch('dias.json?v=' + Date.now()).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((idx) => {
+    if (!idx.dias || !idx.dias.length) throw new Error('vazio');
+    G = idx.gerado || String(Date.now());
+    D = { dias: idx.dias, produtos: [], precos: [], ranking: [], cesta: [] };
+    const last = D.dias[D.dias.length - 1].data;
+    $('dia').replaceChildren(...D.dias.slice().reverse().map((r) => new Option(dataBR(r.data), r.data)));
+    $('dia').value = last;
+    $('gerado').textContent = idx.gerado || '—';
+    return show(last);
+  }).catch(erro);
+})();
+</script>
+</body>
+</html>
