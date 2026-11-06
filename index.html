@@ -108,6 +108,13 @@
   .logo.full img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
   .logo-assai { background: #003399; } .logo-max { background: #0a3f9b; } .logo-nagumo { background: #143762; } .logo-oba { background: #f7941d; }
   .crit { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+  .views { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); z-index: 20;
+           display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--panel); color: var(--fg);
+           border: 1px solid var(--line); box-shadow: 0 4px 14px rgba(0,0,0,.15); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .views[hidden] { display: none; }
+  .views svg { width: 16px; height: 16px; color: var(--blue); flex: none; }
+  .views b { font-weight: 700; }
+  body { padding-bottom: 56px; }
   select:focus-visible, input:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 </style>
 </head>
@@ -197,6 +204,8 @@
 
   <p class="foot">Não lidos neste dia: <span id="naolidos">—</span>. Regras: só ofertas válidas no dia; quando há dois preços vale o menor (app, cartão, a partir de X unidades); industrializados só comparam mesma marca e tamanho; hortifrúti, açougue e ovos comparam pelo tipo. Atualizado em <span id="gerado">—</span>.</p>
 </div>
+
+<div class="views" id="views" hidden title="Visualizações do site"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="currentColor"/></svg><span><b id="views-n">—</b> visualizações</span></div>
 
 <script>
 (function () {
@@ -353,6 +362,15 @@
     if (document.querySelector('.msg')) return;
     document.querySelector('.grid').before(Object.assign(el('p', 'msg'), { textContent: 'Não foi possível carregar os dados agora. Tente recarregar a página em alguns minutos.' }));
   }
+  // Contador de visualizações (Abacus, gratuito): soma 1 por visita (uma vez por sessão do navegador)
+  (function () {
+    const api = 'https://abacus.jasoncameron.dev/', chave = 'fonefirmaa34-sudo.github.io/superofertas-views';
+    let soma = true;
+    try { if (sessionStorage.getItem('so-visto')) soma = false; else sessionStorage.setItem('so-visto', '1'); } catch (e) {}
+    fetch(api + (soma ? 'hit/' : 'get/') + chave).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (j && typeof j.value === 'number' && j.value >= 0) { $('views-n').textContent = int(j.value); $('views').hidden = false; }
+    }).catch(() => {});
+  })();
   let G = '';
   $('dia').addEventListener('change', () => { show($('dia').value).catch(erro); });
 
