@@ -96,6 +96,18 @@
   .tip .k { color: var(--muted); }
   .foot { font-size: 12.5px; color: var(--muted); margin: 0; }
   .msg { padding: 40px 0; text-align: center; color: var(--muted); }
+  .mercs { background: #d7f0cf; color: #17432a; border-radius: 18px; padding: 28px; display: grid; gap: 14px; }
+  .mercs h2 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.5rem, 4vw, 2.2rem); letter-spacing: .03em; line-height: 1.1; }
+  .mercs-sub { margin: 0; font-size: 12.5px; opacity: .85; }
+  .logos { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); }
+  .logos li { display: grid; gap: 6px; justify-items: center; text-align: center; font-size: 12.5px; font-weight: 600; }
+  .logo { width: 100%; height: 76px; border-radius: 12px; background: #ffffff; padding: 8px; display: grid; place-items: center;
+          box-shadow: 0 1px 3px rgba(0,0,0,.12); overflow: hidden; }
+  .logo img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .logo.full { padding: 0; }
+  .logo.full img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
+  .logo-assai { background: #003399; } .logo-max { background: #0a3f9b; } .logo-nagumo { background: #143762; } .logo-oba { background: #f7941d; }
+  .crit { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
   select:focus-visible, input:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 </style>
 </head>
@@ -116,6 +128,23 @@
       <div><dt>Ofertas lidas</dt><dd id="k-ofertas">—</dd></div>
       <div><dt>Produtos comparados</dt><dd id="k-comp">—</dd></div>
     </dl>
+  </section>
+
+  <section class="mercs" aria-labelledby="mercs-titulo">
+    <h2 id="mercs-titulo">Mercados pesquisados</h2>
+    <p class="mercs-sub">Os 10 supermercados cujos folhetos e ofertas são lidos todos os dias.</p>
+    <ul class="logos">
+      <li><span class="logo logo-assai"><img src="logo-assai.webp" alt="Logo Assaí Atacadista" width="106" height="72"></span>Assaí</li>
+      <li><span class="logo"><img src="logo-atacadao.webp" alt="Logo Atacadão" width="210" height="59"></span>Atacadão</li>
+      <li><span class="logo logo-max"><img src="logo-max.webp" alt="Logo Max Atacadista" width="139" height="72"></span>Max Atacadista</li>
+      <li><span class="logo"><img src="logo-dia.webp" alt="Logo Dia" width="130" height="72"></span>Dia</li>
+      <li><span class="logo logo-nagumo"><img src="logo-nagumo.webp" alt="Logo Nagumo" width="210" height="62"></span>Nagumo</li>
+      <li><span class="logo"><img src="logo-carrefour.webp" alt="Logo Carrefour" width="120" height="72"></span>Carrefour</li>
+      <li><span class="logo"><img src="logo-precoecia.webp" alt="Logo Preço &amp; Cia Supermercados" width="180" height="72"></span>Preço &amp; Cia</li>
+      <li><span class="logo"><img src="logo-chama.webp" alt="Logo Chama Supermercados" width="210" height="62"></span>Chama</li>
+      <li><span class="logo logo-oba"><img src="logo-oba.webp" alt="Logo Oba Hortifruti" width="107" height="72"></span>Oba Hortifruti</li>
+      <li><span class="logo"><img src="logo-estrela.webp" alt="Logo Supermercado Estrela Azul" width="100" height="72"></span>Estrela Azul</li>
+    </ul>
   </section>
 
   <div class="grid">
@@ -153,6 +182,12 @@
       <div class="tools">
         <input id="q" type="search" placeholder="Buscar produto" aria-label="Buscar produto">
         <select id="secao" aria-label="Seção"></select>
+        <label class="crit">Critério
+          <select id="crit" aria-label="Critério de produtos em comum">
+            <option value="3">3 comuns (3 ou mais mercados)</option>
+            <option value="2">2 comuns (2 ou mais mercados)</option>
+          </select>
+        </label>
       </div>
       <div class="legend"><span class="l-min">Menor preço</span><span class="l-max">Maior preço</span></div>
       <div class="tablewrap"><table id="tabela"></table></div>
@@ -221,16 +256,36 @@
     $('semana').replaceChildren(...sem.map(([m, n], i) => barra(m, n + (n === 1 ? ' dia' : ' dias'), n / ult.length, i === 0 ? 'gold' : '')));
     $('semana-nota').textContent = ult.length + (ult.length === 1 ? ' dia com dados' : ' dias com dados') + ': ' + dataBR(ult[0].data) + ' a ' + dataBR(ult[ult.length - 1].data);
 
-    const secs = [...new Set(D.produtos.filter((r) => r.data === dia).map((r) => r.secao).filter(Boolean))].sort();
-    const sv = $('secao').value;
-    $('secao').replaceChildren(new Option('Todas as seções', ''), ...secs.map((s) => new Option(s)));
-    $('secao').value = secs.includes(sv) ? sv : '';
+    secoes();
     tabela();
   }
 
+  // Critério da tabela: "3" = produtos em 3 ou mais mercados (lista principal); "2" = em 2 ou mais mercados
+  function fonte() {
+    const info = new Map();
+    if ($('crit').value !== '2') {
+      for (const q of D.produtos) if (q.data === dia) info.set(q.produto, q);
+      return { pr: D.precos.filter((p) => p.data === dia), info };
+    }
+    const pr = (D.precos2 || []).filter((p) => p.data === dia), faixa = new Map();
+    for (const p of pr) {
+      const f = faixa.get(p.produto) || { secao: p.secao, mn: Infinity, mx: -Infinity };
+      f.mn = Math.min(f.mn, p.porUnidade); f.mx = Math.max(f.mx, p.porUnidade); faixa.set(p.produto, f);
+    }
+    for (const [k, f] of faixa) info.set(k, { secao: f.secao, pct: f.mx > 0 ? Math.round((f.mx - f.mn) / f.mx * 1000) / 10 : 0 });
+    return { pr, info };
+  }
+
+  function secoes() {
+    const { info } = fonte();
+    const secs = [...new Set([...info.values()].map((r) => r.secao).filter(Boolean))].sort();
+    const sv = $('secao').value;
+    $('secao').replaceChildren(new Option('Todas as seções', ''), ...secs.map((s) => new Option(s)));
+    $('secao').value = secs.includes(sv) ? sv : '';
+  }
+
   function tabela() {
-    const pr = D.precos.filter((p) => p.data === dia), info = new Map();
-    for (const q of D.produtos) if (q.data === dia) info.set(q.produto, q);
+    const { pr, info } = fonte();
     const by = new Map(), det = new Map(), cnt = new Map();
     for (const p of pr) {
       if (!by.has(p.produto)) by.set(p.produto, { produto: p.produto, unidade: p.unidade, v: {} });
@@ -284,6 +339,7 @@
   $('tabela').addEventListener('mouseleave', () => { $('tip').hidden = true; });
   $('q').addEventListener('input', tabela);
   $('secao').addEventListener('change', tabela);
+  $('crit').addEventListener('change', () => { if (D && dia) { secoes(); tabela(); } });
   const cache = new Map();
   function loadDay(d) {
     if (cache.has(d)) return Promise.resolve(cache.get(d));
@@ -291,7 +347,7 @@
       .then((j) => { cache.set(d, j); return j; });
   }
   function show(d) {
-    return loadDay(d).then((j) => { dia = d; D.produtos = j.produtos; D.precos = j.precos; D.ranking = j.ranking; D.cesta = j.cesta; render(); });
+    return loadDay(d).then((j) => { dia = d; D.produtos = j.produtos; D.precos = j.precos; D.ranking = j.ranking; D.cesta = j.cesta; D.precos2 = j.precos2 || []; render(); });
   }
   function erro() {
     if (document.querySelector('.msg')) return;
