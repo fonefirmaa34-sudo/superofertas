@@ -7,7 +7,7 @@
 <meta name="description" content="Ofertas de 10 supermercados de São Paulo, lidas e comparadas todo dia.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f4f6f7; --panel: #ffffff; --fg: #1d2a30; --muted: #5d6b72; --line: #dde3e6; --track: #e8edef; --bar: #b9c4c9;
@@ -40,6 +40,7 @@
   .kpis div { display: grid; gap: 2px; }
   .kpis dt { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .07em; }
   .kpis dd { margin: 0; font-family: var(--serif); font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+  .kpis dd#k-data { color: var(--yellow); font-weight: 700; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 16px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
   .card > header { background: var(--yellow); color: var(--on-yellow); padding: 12px 20px; }
@@ -128,7 +129,7 @@
       </div>
       <label class="day">Dia <select id="dia" aria-label="Escolher o dia"></select></label>
     </div>
-    <p class="take"><b id="t-venc">—</b> foi o barateiro do dia: mais barato em <b id="t-n">—</b> dos <b id="t-comp">—</b> produtos encontrados em 3 ou mais mercados.</p>
+    <p class="take"><b id="t-venc">—</b> foi o barateiro do dia: mais barato em <b id="t-n">—</b> dos <b id="t-comp">—</b> produtos encontrados em 2 ou mais mercados.</p>
     <dl class="kpis">
       <div><dt>Data</dt><dd id="k-data">—</dd></div>
       <div><dt>Mercados lidos</dt><dd><span id="k-lidos">—</span> de <span id="k-total">—</span></dd></div>
@@ -189,12 +190,6 @@
       <div class="tools">
         <input id="q" type="search" placeholder="Buscar produto" aria-label="Buscar produto">
         <select id="secao" aria-label="Seção"></select>
-        <label class="crit">Critério
-          <select id="crit" aria-label="Critério de produtos em comum">
-            <option value="3">3 comuns (3 ou mais mercados)</option>
-            <option value="2">2 comuns (2 ou mais mercados)</option>
-          </select>
-        </label>
       </div>
       <div class="legend"><span class="l-min">Menor preço</span><span class="l-max">Maior preço</span></div>
       <div class="tablewrap"><table id="tabela"></table></div>
@@ -272,7 +267,7 @@
   // Critério da tabela: "3" = produtos em 3 ou mais mercados (lista principal); "2" = em 2 ou mais mercados
   function fonte() {
     const info = new Map();
-    if ($('crit').value !== '2') {
+    if (!$('crit') || $('crit').value !== '2') {
       for (const q of D.produtos) if (q.data === dia) info.set(q.produto, q);
       return { pr: D.precos.filter((p) => p.data === dia), info };
     }
@@ -348,7 +343,7 @@
   $('tabela').addEventListener('mouseleave', () => { $('tip').hidden = true; });
   $('q').addEventListener('input', tabela);
   $('secao').addEventListener('change', tabela);
-  $('crit').addEventListener('change', () => { if (D && dia) { secoes(); tabela(); } });
+  if ($('crit')) $('crit').addEventListener('change', () => { if (D && dia) { secoes(); tabela(); } });
   const cache = new Map();
   function loadDay(d) {
     if (cache.has(d)) return Promise.resolve(cache.get(d));
