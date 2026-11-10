@@ -224,7 +224,7 @@
     const hoje = D.dias.find((r) => r.data === dia);
     const set = (id, v) => { $(id).textContent = v === null || v === undefined || v === '' ? '—' : v; };
     set('t-venc', hoje.vencedor); set('t-n', hoje.venceuEm); set('t-comp', hoje.produtosComparados);
-    set('k-data', dataBR(hoje.data)); set('k-lidos', hoje.mercadosLidos); set('k-total', hoje.mercadosTotal);
+    set('k-data', hoje.data.slice(8, 10) + '/' + hoje.data.slice(5, 7) + '/' + hoje.data.slice(2, 4)); set('k-lidos', hoje.mercadosLidos); set('k-total', hoje.mercadosTotal);
     set('k-ofertas', int(hoje.totalOfertas)); set('k-comp', hoje.produtosComparados);
     set('tr-venc', hoje.vencedor); set('tr-n', hoje.venceuEm); set('tr-solo', hoje.venceuSozinho);
     set('naolidos', hoje.naoLidos || 'nenhum');
