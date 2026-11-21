@@ -90,6 +90,12 @@
   td.min { background: color-mix(in srgb, var(--ok) 18%, var(--panel)); color: var(--ok); font-weight: 700; }
   td.max { background: color-mix(in srgb, var(--bad) 14%, var(--panel)); color: var(--bad); }
   td.none, .unit { color: var(--muted); }
+  .todas { display: grid; gap: 6px; margin-top: 14px; }
+  .todas h3 { margin: 0; font-size: 15px; }
+  #todas th, #todas td { text-align: left; }
+  #todas td { white-space: normal; }
+  #todas th.preco, #todas td.preco { text-align: right; white-space: nowrap; }
+  #todas td.preco { font-weight: 700; }
   td[data-m] { cursor: help; }
   .tip { position: absolute; z-index: 5; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
          box-shadow: 0 6px 20px rgba(0,0,0,.18); padding: 6px 10px; font-size: 12.5px; max-width: 18rem; display: grid; gap: 2px; }
@@ -190,15 +196,20 @@
   </article>
 
   <article class="card">
-    <header><h2>Produtos em comum com preços</h2><p>Preço por unidade em cada mercado; passe o mouse (ou toque) num preço para ver o produto e a condição da oferta</p></header>
+    <header><h2>Produtos em comum com preços</h2><p>Preço por unidade em cada mercado; passe o mouse (ou toque) num preço para ver o produto e a condição da oferta. A busca também procura em todas as ofertas do dia, mesmo as de um mercado só.</p></header>
     <div class="body" id="tabela-card">
       <div class="tools">
-        <input id="q" type="search" placeholder="Buscar produto" aria-label="Buscar produto">
+        <input id="q" type="search" placeholder="Buscar produto em todas as ofertas" aria-label="Buscar produto">
         <select id="secao" aria-label="Seção"></select>
       </div>
       <div class="legend"><span class="l-min">Menor preço</span><span class="l-max">Maior preço</span></div>
       <div class="tablewrap"><table id="tabela"></table></div>
       <div class="tip" id="tip" hidden></div>
+      <div class="todas" id="todas-wrap" hidden>
+        <h3>Todas as ofertas do dia com esse termo</h3>
+        <p class="note" id="todas-n"></p>
+        <div class="tablewrap"><table id="todas"><thead><tr><th>Produto</th><th>Mercado</th><th class="preco">Preço</th><th>Condição</th><th>Seção</th></tr></thead><tbody id="todas-b"></tbody></table></div>
+      </div>
     </div>
   </article>
 
@@ -267,6 +278,7 @@
 
     secoes();
     tabela();
+    todas();
   }
 
   // Critério da tabela: "3" = produtos em 3 ou mais mercados (lista principal); "2" = em 2 ou mais mercados
@@ -347,8 +359,35 @@
   $('tabela').addEventListener('click', dica);
   $('tabela').addEventListener('mouseleave', () => { $('tip').hidden = true; });
   $('q').addEventListener('input', tabela);
+  $('q').addEventListener('input', todas);
   $('secao').addEventListener('change', tabela);
   if ($('crit')) $('crit').addEventListener('change', () => { if (D && dia) { secoes(); tabela(); } });
+  // Busca em todas as ofertas do dia (arquivo d/<dia>-ofertas.json, carregado só quando se busca)
+  const cacheOf = new Map();
+  const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  function loadOfertas(d) {
+    if (!cacheOf.has(d)) cacheOf.set(d, fetch('d/' + d + '-ofertas.json?v=' + encodeURIComponent(G)).then((r) => (r.ok ? r.json() : null))
+      .then((j) => (j && j.ofertas ? j.ofertas : null)).catch(() => null));
+    return cacheOf.get(d);
+  }
+  let buscaN = 0;
+  function todas() {
+    const wrap = $('todas-wrap'); if (!wrap) return;
+    const q = norm($('q').value.trim());
+    if (q.length < 2 || !dia) { wrap.hidden = true; return; }
+    const n = ++buscaN, d = dia;
+    wrap.hidden = false; $('todas-n').textContent = 'Buscando…'; $('todas-b').replaceChildren();
+    loadOfertas(d).then((of) => {
+      if (n !== buscaN) return;
+      if (!of) { $('todas-n').textContent = 'A busca em todas as ofertas está disponível a partir de 21/11/2026; neste dia a tabela acima mostra só os produtos em comum.'; return; }
+      const termos = q.split(/\s+/).filter(Boolean);
+      const rows = of.filter((r) => { const t = norm(r[2] + ' ' + r[0]); return termos.every((x) => t.includes(x)); })
+        .sort((a, b) => a[3] - b[3] || a[2].localeCompare(b[2]));
+      const MAX = 300;
+      $('todas-n').textContent = rows.length ? rows.length + (rows.length === 1 ? ' oferta encontrada' : ' ofertas encontradas') + ' nos mercados lidos neste dia, da mais barata para a mais cara' + (rows.length > MAX ? ' (mostrando as ' + MAX + ' primeiras)' : '') + '. Preços "por kg" estão indicados na condição.' : 'Nenhuma oferta encontrada com esse termo neste dia.';
+      $('todas-b').replaceChildren(...rows.slice(0, MAX).map((r) => { const tr = el('tr'); tr.append(el('td', '', r[2]), el('td', '', r[0]), el('td', 'preco', brl(r[3])), el('td', 'unit', r[4]), el('td', 'unit', r[1])); return tr; }));
+    });
+  }
   const cache = new Map();
   function loadDay(d) {
     if (cache.has(d)) return Promise.resolve(cache.get(d));
